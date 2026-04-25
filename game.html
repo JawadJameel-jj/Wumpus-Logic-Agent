@@ -6,26 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wumpus Logic Agent</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323:wght@400&display=swap');
 
         :root {
-            --bg: #050a0e;
-            --panel: #0a1520;
-            --border: #1a3a5c;
-            --accent: #00d4ff;
-            --accent2: #ff6b35;
-            --safe: #00ff88;
-            --danger: #ff2244;
-            --unknown: #1a2a3a;
-            --visited: #0a3a5a;
-            --agent: #ffd700;
-            --stench: #aa44ff;
-            --breeze: #00aaff;
-            --text: #c8e6f0;
-            --dim: #4a7a99;
-            --gold: #ffd700;
-            --pit-color: #ff1a3a;
-            --wumpus-color: #cc00ff;
+            --bg: #0d0015;
+            --panel: #12001f;
+            --border: #6600cc;
+            --accent: #cc00ff;
+            --accent2: #ff4400;
+            --safe: #39ff14;
+            --danger: #ff003c;
+            --unknown: #1a0028;
+            --visited: #2a0044;
+            --agent: #ffdd00;
+            --stench: #ff00aa;
+            --breeze: #00ccff;
+            --text: #e8d0ff;
+            --dim: #7744aa;
+            --gold: #ffdd00;
+            --pit-color: #ff003c;
+            --wumpus-color: #ff00aa;
         }
 
         * {
@@ -37,7 +37,8 @@
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: 'Share Tech Mono', monospace;
+            font-family: 'VT323', monospace;
+            font-size: 18px;
             min-height: 100vh;
             overflow-x: hidden;
         }
@@ -47,8 +48,9 @@
             position: fixed;
             inset: 0;
             background:
-                radial-gradient(ellipse 80% 50% at 20% 20%, rgba(0, 212, 255, 0.04) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255, 107, 53, 0.04) 0%, transparent 60%);
+                radial-gradient(ellipse 70% 50% at 15% 15%, rgba(180, 0, 255, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 85% 85%, rgba(255, 0, 60, 0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 60% at 50% 50%, rgba(100, 0, 180, 0.04) 0%, transparent 70%);
             pointer-events: none;
             z-index: 0;
         }
@@ -56,7 +58,7 @@
         .scanline {
             position: fixed;
             inset: 0;
-            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+            background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0, 0, 0, 0.08) 3px, rgba(0, 0, 0, 0.08) 6px);
             pointer-events: none;
             z-index: 1;
         }
@@ -77,19 +79,45 @@
         }
 
         header h1 {
-            font-family: 'Orbitron', sans-serif;
-            font-size: clamp(1.4rem, 3vw, 2.4rem);
-            font-weight: 900;
-            letter-spacing: 0.15em;
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(0.85rem, 2vw, 1.5rem);
+            font-weight: 400;
+            letter-spacing: 0.05em;
             color: var(--accent);
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+            text-shadow: 0 0 10px rgba(204, 0, 255, 0.9), 0 0 30px rgba(204, 0, 255, 0.4), 3px 3px 0 #330055;
+            animation: title-flicker 5s infinite;
+        }
+
+        @keyframes title-flicker {
+
+            0%,
+            94%,
+            100% {
+                opacity: 1;
+            }
+
+            95% {
+                opacity: 0.6;
+            }
+
+            96% {
+                opacity: 1;
+            }
+
+            97.5% {
+                opacity: 0.4;
+            }
+
+            98% {
+                opacity: 1;
+            }
         }
 
         header p {
-            font-size: 0.75rem;
+            font-size: 1rem;
             color: var(--dim);
-            letter-spacing: 0.2em;
-            margin-top: 4px;
+            letter-spacing: 0.12em;
+            margin-top: 10px;
         }
 
         .main-layout {
@@ -107,10 +135,11 @@
 
         .panel {
             background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 4px;
+            border: 2px solid var(--border);
+            border-radius: 0;
             padding: 16px;
             position: relative;
+            box-shadow: 0 0 12px rgba(180, 0, 255, 0.2), inset 0 0 20px rgba(100, 0, 180, 0.05);
         }
 
         .panel::before {
@@ -119,18 +148,30 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent), transparent);
-            opacity: 0.6;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent), #ff00aa, var(--accent), transparent);
+            opacity: 0.9;
+        }
+
+        .panel::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            opacity: 0.5;
         }
 
         .panel-title {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.65rem;
-            letter-spacing: 0.25em;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.5rem;
+            letter-spacing: 0.1em;
             color: var(--accent);
             margin-bottom: 14px;
             text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(204, 0, 255, 0.6);
         }
 
         /* Controls */
@@ -138,29 +179,24 @@
             margin-bottom: 12px;
         }
 
-        label {
-            display: block;
-            font-size: 0.7rem;
-            color: var(--dim);
-            letter-spacing: 0.15em;
-            margin-bottom: 4px;
-        }
+
 
         input[type="number"] {
             width: 100%;
             background: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 0.9rem;
+            border: 2px solid var(--border);
+            color: var(--accent);
+            font-family: 'VT323', monospace;
+            font-size: 1.3rem;
             padding: 6px 10px;
-            border-radius: 2px;
+            border-radius: 0;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
         input[type="number"]:focus {
             border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(204, 0, 255, 0.4);
         }
 
         input[type="range"] {
@@ -170,57 +206,89 @@
 
         .btn {
             width: 100%;
-            padding: 9px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.65rem;
-            letter-spacing: 0.2em;
+            padding: 10px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.5rem;
+            letter-spacing: 0.1em;
             border: none;
-            border-radius: 2px;
+            border-radius: 0;
             cursor: pointer;
-            transition: all 0.2s;
-            margin-bottom: 8px;
+            transition: all 0.15s;
+            margin-bottom: 10px;
             text-transform: uppercase;
+            position: relative;
         }
 
         .btn-primary {
             background: var(--accent);
-            color: var(--bg);
-            font-weight: 700;
+            color: #000;
+            font-weight: 400;
+            box-shadow: 0 4px 0 #660088, 0 0 15px rgba(204, 0, 255, 0.5);
         }
 
         .btn-primary:hover {
-            background: #00eeff;
-            box-shadow: 0 0 12px rgba(0, 212, 255, 0.4);
+            background: #ee00ff;
+            box-shadow: 0 4px 0 #440066, 0 0 25px rgba(204, 0, 255, 0.8);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #440066;
         }
 
         .btn-secondary {
             background: transparent;
             color: var(--accent2);
-            border: 1px solid var(--accent2);
+            border: 2px solid var(--accent2);
+            box-shadow: 0 4px 0 #880022;
         }
 
         .btn-secondary:hover {
-            background: rgba(255, 107, 53, 0.1);
+            background: rgba(255, 68, 0, 0.15);
+            box-shadow: 0 4px 0 #880022, 0 0 15px rgba(255, 68, 0, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #880022;
         }
 
         .btn-step {
             background: transparent;
             color: var(--safe);
-            border: 1px solid var(--safe);
+            border: 2px solid var(--safe);
+            box-shadow: 0 4px 0 #007700;
         }
 
         .btn-step:hover {
-            background: rgba(0, 255, 136, 0.1);
+            background: rgba(57, 255, 20, 0.1);
+            box-shadow: 0 4px 0 #007700, 0 0 15px rgba(57, 255, 20, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-step:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #007700;
         }
 
         .btn-auto {
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(255, 221, 0, 0.1);
             color: var(--gold);
-            border: 1px solid var(--gold);
+            border: 2px solid var(--gold);
+            box-shadow: 0 4px 0 #886600;
         }
 
         .btn-auto:hover {
-            background: rgba(255, 215, 0, 0.2);
+            background: rgba(255, 221, 0, 0.2);
+            box-shadow: 0 4px 0 #886600, 0 0 15px rgba(255, 221, 0, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-auto:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #886600;
         }
 
         .btn:disabled {
@@ -239,26 +307,35 @@
         #grid-wrap {
             display: grid;
             gap: 3px;
-            background: rgba(0, 212, 255, 0.05);
-            border: 1px solid var(--border);
-            padding: 8px;
-            border-radius: 4px;
+            background: rgba(180, 0, 255, 0.07);
+            border: 2px solid var(--border);
+            padding: 10px;
+            border-radius: 0;
+            box-shadow: 0 0 20px rgba(180, 0, 255, 0.2), inset 0 0 30px rgba(100, 0, 180, 0.08);
         }
 
         .cell {
             width: 64px;
             height: 64px;
-            border: 1px solid rgba(26, 58, 92, 0.7);
-            border-radius: 2px;
+            border: 2px solid rgba(102, 0, 204, 0.6);
+            border-radius: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
             font-size: 0.6rem;
-            transition: all 0.3s;
+            transition: all 0.2s;
             cursor: default;
             overflow: hidden;
+        }
+
+        .cell::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+            pointer-events: none;
         }
 
         @media (max-width: 900px) {
@@ -269,23 +346,25 @@
         }
 
         .cell-label {
-            font-size: 0.5rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.35rem;
             color: var(--dim);
             position: absolute;
-            top: 2px;
+            top: 3px;
             left: 3px;
             letter-spacing: 0;
         }
 
         .cell-icons {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             line-height: 1;
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
         }
 
         .cell-percepts {
             position: absolute;
             bottom: 2px;
-            font-size: 0.55rem;
+            font-size: 0.6rem;
             display: flex;
             gap: 2px;
         }
@@ -297,49 +376,54 @@
 
         .cell-visited {
             background: var(--visited);
-            border-color: rgba(0, 212, 255, 0.3);
+            border-color: rgba(180, 0, 255, 0.5);
         }
 
         .cell-safe {
-            background: rgba(0, 255, 136, 0.08);
-            border-color: rgba(0, 255, 136, 0.4);
+            background: rgba(57, 255, 20, 0.07);
+            border-color: rgba(57, 255, 20, 0.5);
+            box-shadow: inset 0 0 8px rgba(57, 255, 20, 0.1);
         }
 
         .cell-agent {
-            background: rgba(255, 215, 0, 0.12);
-            border-color: rgba(255, 215, 0, 0.6);
-            animation: pulse-agent 1.2s infinite;
+            background: rgba(255, 221, 0, 0.12);
+            border-color: rgba(255, 221, 0, 0.8);
+            animation: pulse-agent 1s infinite;
         }
 
         .cell-pit {
-            background: rgba(255, 34, 68, 0.2);
+            background: rgba(255, 0, 60, 0.25);
             border-color: var(--danger);
+            box-shadow: inset 0 0 12px rgba(255, 0, 60, 0.3);
         }
 
         .cell-wumpus {
-            background: rgba(204, 0, 255, 0.2);
+            background: rgba(255, 0, 170, 0.2);
             border-color: var(--wumpus-color);
+            box-shadow: inset 0 0 12px rgba(255, 0, 170, 0.2);
         }
 
         .cell-dead {
-            background: rgba(255, 34, 68, 0.4);
+            background: rgba(255, 0, 60, 0.45);
             border-color: var(--danger);
+            box-shadow: inset 0 0 20px rgba(255, 0, 60, 0.5);
         }
 
         .cell-gold {
-            background: rgba(255, 215, 0, 0.15);
+            background: rgba(255, 221, 0, 0.18);
             border-color: var(--gold);
+            box-shadow: inset 0 0 12px rgba(255, 221, 0, 0.2);
         }
 
         @keyframes pulse-agent {
 
             0%,
             100% {
-                box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+                box-shadow: 0 0 10px rgba(255, 221, 0, 0.5), inset 0 0 10px rgba(255, 221, 0, 0.1);
             }
 
             50% {
-                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                box-shadow: 0 0 25px rgba(255, 221, 0, 1), inset 0 0 15px rgba(255, 221, 0, 0.2);
             }
         }
 
@@ -348,9 +432,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(26, 58, 92, 0.5);
-            font-size: 0.75rem;
+            padding: 7px 0;
+            border-bottom: 1px solid rgba(102, 0, 204, 0.4);
+            font-size: 1rem;
         }
 
         .metric:last-child {
@@ -359,22 +443,23 @@
 
         .metric-label {
             color: var(--dim);
-            font-size: 0.68rem;
-            letter-spacing: 0.1em;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
         }
 
         .metric-value {
             color: var(--accent);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 0.85rem;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.6rem;
+            text-shadow: 0 0 8px rgba(204, 0, 255, 0.7);
         }
 
         /* KB Log */
         #kb-log {
             max-height: 180px;
             overflow-y: auto;
-            font-size: 0.65rem;
-            line-height: 1.6;
+            font-size: 1rem;
+            line-height: 1.5;
             color: var(--dim);
         }
 
@@ -388,6 +473,7 @@
 
         #kb-log::-webkit-scrollbar-thumb {
             background: var(--border);
+            border-radius: 0;
         }
 
         .log-entry {
@@ -395,101 +481,125 @@
         }
 
         .log-tell {
-            color: #4af;
+            color: #bb44ff;
         }
 
         .log-ask {
-            color: #4fa;
+            color: #39ff14;
         }
 
         .log-infer {
-            color: #fa4;
+            color: #ffdd00;
         }
 
         .log-move {
-            color: var(--text);
+            color: #00ccff;
         }
 
         .log-warn {
             color: var(--danger);
+            text-shadow: 0 0 6px rgba(255, 0, 60, 0.5);
         }
 
         .log-win {
             color: var(--gold);
+            text-shadow: 0 0 8px rgba(255, 221, 0, 0.6);
         }
 
         /* Percept badges */
         .percept-badge {
             display: inline-block;
-            padding: 2px 8px;
-            border-radius: 2px;
-            font-size: 0.65rem;
-            letter-spacing: 0.15em;
-            margin: 2px;
+            padding: 3px 10px;
+            border-radius: 0;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            margin: 3px;
+            border-width: 2px;
+            border-style: solid;
         }
 
         .pb-breeze {
-            background: rgba(0, 170, 255, 0.15);
-            border: 1px solid #0af;
-            color: #0af;
+            background: rgba(0, 204, 255, 0.1);
+            border-color: #0cf;
+            color: #0cf;
+            text-shadow: 0 0 6px rgba(0, 204, 255, 0.6);
         }
 
         .pb-stench {
-            background: rgba(170, 68, 255, 0.15);
-            border: 1px solid #a4f;
-            color: #a4f;
+            background: rgba(255, 0, 170, 0.1);
+            border-color: #f0a;
+            color: #f0a;
+            text-shadow: 0 0 6px rgba(255, 0, 170, 0.6);
         }
 
         .pb-none {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid var(--safe);
+            background: rgba(57, 255, 20, 0.07);
+            border-color: var(--safe);
             color: var(--safe);
+            text-shadow: 0 0 6px rgba(57, 255, 20, 0.5);
         }
 
         .pb-glitter {
-            background: rgba(255, 215, 0, 0.15);
-            border: 1px solid var(--gold);
+            background: rgba(255, 221, 0, 0.1);
+            border-color: var(--gold);
             color: var(--gold);
+            text-shadow: 0 0 6px rgba(255, 221, 0, 0.6);
         }
 
         #percept-display {
-            min-height: 28px;
+            min-height: 32px;
         }
 
         /* Status bar */
         #status-bar {
-            padding: 6px 12px;
-            border: 1px solid var(--border);
-            border-radius: 2px;
-            font-size: 0.72rem;
-            letter-spacing: 0.1em;
+            padding: 8px 14px;
+            border: 2px solid var(--border);
+            border-radius: 0;
+            font-size: 0.95rem;
+            letter-spacing: 0.08em;
             text-align: center;
             width: 100%;
         }
 
         .status-ok {
             color: var(--safe);
-            border-color: rgba(0, 255, 136, 0.3);
-            background: rgba(0, 255, 136, 0.05);
+            border-color: rgba(57, 255, 20, 0.4);
+            background: rgba(57, 255, 20, 0.05);
+            text-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
         }
 
         .status-warn {
             color: var(--accent2);
-            border-color: rgba(255, 107, 53, 0.3);
-            background: rgba(255, 107, 53, 0.05);
+            border-color: rgba(255, 68, 0, 0.4);
+            background: rgba(255, 68, 0, 0.05);
         }
 
         .status-dead {
             color: var(--danger);
-            border-color: rgba(255, 34, 68, 0.5);
-            background: rgba(255, 34, 68, 0.08);
-            animation: flash-red 0.5s 3;
+            border-color: rgba(255, 0, 60, 0.6);
+            background: rgba(255, 0, 60, 0.1);
+            animation: flash-red 0.4s 4;
+            text-shadow: 0 0 12px rgba(255, 0, 60, 0.8);
         }
 
         .status-win {
             color: var(--gold);
-            border-color: rgba(255, 215, 0, 0.5);
-            background: rgba(255, 215, 0, 0.08);
+            border-color: rgba(255, 221, 0, 0.6);
+            background: rgba(255, 221, 0, 0.08);
+            text-shadow: 0 0 12px rgba(255, 221, 0, 0.7);
+            animation: win-pulse 1s infinite;
+        }
+
+        @keyframes win-pulse {
+
+            0%,
+            100% {
+                text-shadow: 0 0 12px rgba(255, 221, 0, 0.7);
+            }
+
+            50% {
+                text-shadow: 0 0 25px rgba(255, 221, 0, 1), 0 0 40px rgba(255, 221, 0, 0.5);
+            }
         }
 
         @keyframes flash-red {
@@ -509,16 +619,16 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 0.68rem;
+            font-size: 0.95rem;
             color: var(--dim);
-            margin-bottom: 6px;
+            margin-bottom: 7px;
         }
 
         .legend-swatch {
             width: 14px;
             height: 14px;
-            border-radius: 2px;
-            border: 1px solid;
+            border-radius: 0;
+            border: 2px solid;
             flex-shrink: 0;
         }
 
@@ -526,9 +636,9 @@
         #resolution-steps {
             max-height: 120px;
             overflow-y: auto;
-            font-size: 0.6rem;
-            color: #4af;
-            line-height: 1.7;
+            font-size: 0.95rem;
+            color: #bb44ff;
+            line-height: 1.6;
         }
 
         #resolution-steps::-webkit-scrollbar {
@@ -540,16 +650,25 @@
         }
 
         .sep {
-            height: 1px;
-            background: var(--border);
-            margin: 10px 0;
-            opacity: 0.5;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--border), transparent);
+            margin: 12px 0;
+            opacity: 0.7;
         }
 
         .range-val {
             float: right;
             color: var(--accent);
-            font-size: 0.75rem;
+            font-size: 1rem;
+            text-shadow: 0 0 6px rgba(204, 0, 255, 0.5);
+        }
+
+        label {
+            display: block;
+            font-size: 0.95rem;
+            color: var(--dim);
+            letter-spacing: 0.08em;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -699,21 +818,12 @@
             return { name, negated };
         }
 
-        function negateLit(lit) {
-            return { name: lit.name, negated: !lit.negated };
-        }
-
         function litKey(lit) {
             return (lit.negated ? '~' : '') + lit.name;
         }
 
         function clauseKey(clause) {
             return [...clause].map(litKey).sort().join('|');
-        }
-
-        // Convert clause array to canonical string for dedup
-        function clausesEqual(a, b) {
-            return clauseKey(a) === clauseKey(b);
         }
 
         // Resolution: resolve two clauses on a complementary literal
@@ -737,7 +847,6 @@
                         if (!seen.has(k)) { seen.add(k); deduped.push(l); }
                     }
                     // Check tautology (contains both P and ~P)
-                    const names = deduped.map(l => l.name);
                     const isTaut = deduped.some(l => deduped.some(l2 => l2.name === l.name && l2.negated !== l.negated));
                     if (isTaut) return null;
 
@@ -822,21 +931,29 @@
                 }
             }
 
-            // Tell biconditional: B_{r}_{c} ⟺ (P_{r1}_{c1} ∨ P_{r2}_{c2} ∨ ...)
-            // Encoded as CNF:
-            // Forward: B → (P1∨P2∨...) => ~B ∨ P1 ∨ P2 ∨ ...
-            // Backward: (P1∨P2∨...) → B => each Pi → B: ~Pi ∨ B
+            // Tell biconditional: B_{r,c} ⟺ (P_{adj1} ∨ P_{adj2} ∨ ...)
+            // CNF encoding:
+            // Forward  (B → disjunction): ~B ∨ P1 ∨ P2 ∨ ...
+            // Backward (Pi → B) for each i: ~Pi ∨ B
             tellBiconditional(sensorName, sensorActive, hazardLit, adjCells, hazardType, reason) {
-                // sensorActive: true/false - whether sensor was triggered
+                const sensorLit = makeLit(sensorName, !sensorActive); // ~B if active=false, B if active=true... we encode the truth value directly below
+
                 if (sensorActive) {
-                    // B is true. Tell: ~B is false (B = true already encoded elsewhere)
-                    // Forward: B → (P1 ∨ P2 ∨ ...) : tell [P1 ∨ P2 ∨ ...]
-                    const clause = adjCells.map(([r, c]) => makeLit(`${hazardLit}_${r}_${c}`));
-                    this.tell(clause, `${reason} (∃ hazard in neighbors)`);
-                } else {
-                    // B is false → ¬P for each adjacent cell
+                    // Sensor is TRUE: tell B is true (unit clause)
+                    this.tell([makeLit(sensorName)], `${reason}: sensor active`);
+                    // Forward: B → (P1∨P2∨...): ~B ∨ P1 ∨ P2 ∨ ...
+                    const fwdClause = [makeLit(sensorName, true), ...adjCells.map(([r, c]) => makeLit(`${hazardLit}_${r}_${c}`))];
+                    this.tell(fwdClause, `${reason}: fwd biconditional`);
+                    // Backward: each ~Pi ∨ B
                     for (const [r, c] of adjCells) {
-                        this.tell([makeLit(`${hazardLit}_${r}_${c}`, true)], `${reason} (safe neighbor)`);
+                        this.tell([makeLit(`${hazardLit}_${r}_${c}`, true), makeLit(sensorName)], `${reason}: bwd biconditional`);
+                    }
+                } else {
+                    // Sensor is FALSE: tell ~B (unit clause)
+                    this.tell([makeLit(sensorName, true)], `${reason}: sensor inactive`);
+                    // ~B → ~P for each adj: since B is false, all adj must be false
+                    for (const [r, c] of adjCells) {
+                        this.tell([makeLit(`${hazardLit}_${r}_${c}`, true)], `${reason}: no ${hazardType} at (${r},${c})`);
                     }
                 }
             }
@@ -974,36 +1091,22 @@
 
                 // Tell current cell is visited/safe
                 this.kb.tell([makeLit(`S_${r}_${c}`)], `Visited cell (${r},${c}) — safe`);
+                this.kb.tell([makeLit(`P_${r}_${c}`, true)], `Visited (${r},${c}) — no pit here`);
+                this.kb.tell([makeLit(`W_${r}_${c}`, true)], `Visited (${r},${c}) — no wumpus here`);
 
-                // Tell breeze/no-breeze
                 const { breeze, stench } = this.percepts;
-
-                this.kb.log.push({ type: 'tell', msg: `PERCEPT at (${r},${c}): B=${breeze}, S=${stench}` });
+                this.kb.log.push({ type: 'tell', msg: `PERCEPT at (${r},${c}): Breeze=${breeze}, Stench=${stench}` });
 
                 // Breeze biconditional: B_{r,c} ⟺ ∃ adjacent pit
-                this.kb.tellBiconditional(
-                    `B_${r}_${c}`, breeze, 'P', adj, 'Pit',
-                    `Breeze=${breeze} at (${r},${c})`
-                );
+                this.kb.tellBiconditional(`B_${r}_${c}`, breeze, 'P', adj, 'Pit', `Breeze at (${r},${c})`);
 
                 // Stench biconditional: ST_{r,c} ⟺ ∃ adjacent wumpus
-                this.kb.tellBiconditional(
-                    `ST_${r}_${c}`, stench, 'W', adj, 'Wumpus',
-                    `Stench=${stench} at (${r},${c})`
-                );
+                this.kb.tellBiconditional(`ST_${r}_${c}`, stench, 'W', adj, 'Wumpus', `Stench at (${r},${c})`);
 
-                // If no breeze & no stench, tell all adjacent are safe
-                if (!breeze) {
+                // When no breeze and no stench: mark all adjacent cells as safe in agent's safe-set
+                if (!breeze && !stench) {
                     for (const [ar, ac] of adj) {
-                        if (!this.safe.has(this._cellKey(ar, ac))) {
-                            this.safe.add(this._cellKey(ar, ac));
-                            this.kb.tell([makeLit(`S_${ar}_${ac}`)], `No breeze at (${r},${c}) → (${ar},${ac}) is pit-safe`);
-                        }
-                    }
-                }
-                if (!stench) {
-                    for (const [ar, ac] of adj) {
-                        this.kb.tell([makeLit(`W_${ar}_${ac}`, true)], `No stench at (${r},${c}) → no wumpus at (${ar},${ac})`);
+                        this.safe.add(this._cellKey(ar, ac));
                     }
                 }
             }
@@ -1134,7 +1237,7 @@
 
         function stepAgent() {
             if (!agent || agent.status !== 'active') return;
-            const cont = agent.step();
+            agent.step();
             renderGrid();
             renderMetrics();
             renderPercepts();
